@@ -1,7 +1,8 @@
 import React, { useState } from "react";
 import { Routes, Route, useNavigate } from "react-router-dom";
 import Result from "./Result";
-import "./App.css";
+
+const API_URL = "https://golf-backend-wmbb.onrender.com";
 
 function App() {
   const navigate = useNavigate();
@@ -13,34 +14,37 @@ function App() {
     phone: "",
   });
 
+  // handle input change
   const handleChange = (e) => {
-    setFormData(prev => ({
-      ...prev,
+    setFormData({
+      ...formData,
       [e.target.name]: e.target.value,
-    }));
+    });
   };
 
+  // submit form
   const handleSubmit = async (e) => {
     e.preventDefault();
 
     try {
-      const res = await fetch("http://localhost:5000/users", {
+      const res = await fetch(`${API_URL}/users`, {
         method: "POST",
-        headers: { "Content-Type": "application/json" },
+        headers: {
+          "Content-Type": "application/json",
+        },
         body: JSON.stringify(formData),
       });
+
       const data = await res.json();
 
       if (!res.ok) {
-        const msg = data.error
-          ? `${data.message}\n\n${data.error}`
-          : data.message || "Failed to save. Try again.";
-        alert(msg);
+        alert(data.message || "Failed to save data");
         return;
       }
+
       navigate("/result");
-    } catch {
-      alert("Network error. Is the backend running on http://localhost:5000?");
+    } catch (error) {
+      alert("Backend not reachable");
     }
   };
 
@@ -51,7 +55,7 @@ function App() {
         path="/"
         element={
           <div className="min-h-screen flex items-center justify-center bg-green-100">
-            <div className="bg-white p-8 rounded-lg shadow-md w-full max-w-md">
+            <div className="bg-white p-8 rounded shadow-md w-full max-w-md">
               <h1 className="text-2xl font-bold text-center mb-4 text-green-700">
                 Golf Course Form
               </h1>
@@ -63,6 +67,7 @@ function App() {
                       {field}
                     </label>
                     <input
+                      type="text"
                       name={field}
                       value={formData[field]}
                       onChange={handleChange}
